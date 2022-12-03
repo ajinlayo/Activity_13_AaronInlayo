@@ -1,0 +1,99 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+#NTP
+  - name: Install Chrony (NTP)
+    apt:
+      name: chrony
+      state: latest
+
+  - replace:
+      dest: /etc/chrony/chrony.conf
+      regexp: server NTP_SERVER iburst
+      replace: server 192.168.56.102 iburst
+      backup: yes
+
+  - name: add key to chrony.conf (NTP)
+    ansible.builtin.lineinfile:
+      dest: /etc/chrony/chrony.conf
+      line: allow 10.0.0.0/24
+      backup: yes
+
+  - name: Restart NTP
+    ansible.builtin.service:
+      name: chrony
+      state: restarted
+
+#OpenStack
+
+  - name: Install nova-compute (OpenStack)
+    apt:
+      name: nova-compute
+      state: latest
+
+  - name: python3-openstackclient (OpenStack)
+    apt:
+      name: python3-openstackclient
+      state: latest
+
+#SQL Database
+
+  - name: Install mariadb packages
+    apt:
+      name: mariadb-server
+      state: latest
+
+  - name: Install python3 packages
+    apt:
+      name: python3-pymysql
+      state: latest
+
+  - name: Restart SQL
+    ansible.builtin.service:
+     name: mysql
+     state: restarted
+
+#Message Queue
+
+  - name: Install rabbitmq-server (Message queue)
+    apt:
+      name: rabbitmq-server
+      state: latest
+
+#Memchaced
+
+  - name: Install Memcached python3-memcache
+    apt:
+      name: memcached
+      state: latest
+
+  - name: Install Memcached python3-memcache
+    apt:
+      name: python3-memcache
+      state: latest
+
+  - name: Restart Memcached
+    ansible.builtin.service:
+      name: memcached
+      state: restarted
+
+#Etcd
+  - name: Install etcd packages
+    apt:
+      name: etcd
+      state: latest
+
+
+  - name: Enable etcd
+    ansible.builtin.service:
+      name: etcd
+      enabled: yes
+
+  - name: Restart Etcd
+    ansible.builtin.service:
+      name: etcd
+      state: restarted
+
